@@ -6,6 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Core\Annotation\ApiFilter;
 use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
+use ApiPlatform\Core\Annotation\ApiSubresource;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\OrderFilter;
@@ -14,8 +15,23 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 /**
  * @ORM\Entity(repositoryClass="App\Repository\CustomerRepository")
  * @ApiResource(
+ *  collectionOperations={
+ *      "GET"={
+ *          "path" = "/clients"
+ *      }, 
+ *      "POST"
+ *  },
+ *  itemOperations={
+ *      "GET" = {
+ *          "path" = "/clients/{id}"
+ *      }, 
+ *      "PUT", 
+ *      "DELETE"
+ *  },
  *  normalizationContext={
- *      "groups"={"customers_read"} 
+ *      "groups"={
+ *          "customers_read"
+ *      } 
  *  }
  * )
  * @ApiFilter(SearchFilter::class)
@@ -58,12 +74,13 @@ class Customer
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Invoice", mappedBy="customer")
      * @Groups({"customers_read"})
+     * @ApiSubresource
      */
     private $invoices;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="customers")
-     * @Groups({"customers_read", "invoices_read"})
+     * @Groups({"customers_read"})
      */
     private $user;
 
@@ -166,5 +183,30 @@ class Customer
         $this->user = $user;
 
         return $this;
+    }
+
+    /**
+     * Permet de récupérer le total des invoices
+     * @Groups({"customers_read"})
+     *
+     * @return float
+     */
+    public function getTotalAmount():float  {
+        return array_reduce($this->invoices->toArray(), function($total, $invoice) {
+            return $total + $invoice->getAmount();  
+        }, 0);
+    }
+
+    /**
+     * Récupérer les impayés
+     * @Groups({"customers_read"})
+     *
+     * @return float
+     */
+    public function getUnpaidAmount():float {
+        return array_reduce($this->invoices->toArray(), function($total, $invoice) {
+            return $total + ($invoice->getStatus() === "PAID" || $invoice->getStatus() === "CANCELED" ? 0 :
+            $invoice->getAmount());
+        }, 0);
     }
 }
