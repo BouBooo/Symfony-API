@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 use ApiPlatform\Core\Annotation\ApiFilter;
 use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
@@ -16,15 +17,11 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
  * @ORM\Entity(repositoryClass="App\Repository\CustomerRepository")
  * @ApiResource(
  *  collectionOperations={
- *      "GET"={
- *          "path" = "/clients"
- *      }, 
+ *      "GET", 
  *      "POST"
  *  },
  *  itemOperations={
- *      "GET" = {
- *          "path" = "/clients/{id}"
- *      }, 
+ *      "GET", 
  *      "PUT", 
  *      "DELETE"
  *  },
@@ -50,18 +47,24 @@ class Customer
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups({"customers_read", "invoices_read"})
+     * @Assert\NotBlank(message="Le prénom du client est obligatoire")
+     * @Assert\Length(min=3, minMessage="Le prénom doit faire minimum 3 charactères", max=255, maxMessage="Le prénom doit faire maximum 255 charactères")
      */
     private $firstName;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups({"customers_read", "invoices_read"})
+     * @Assert\NotBlank(message="Le nom du client est obligatoire")
+     * @Assert\Length(min=3, minMessage="Le nom doit faire minimum 3 charactères", max=255, maxMessage="Le nom doit faire maximum 255 charactères")
      */
     private $lastName;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups({"customers_read", "invoices_read"})
+     * @Assert\NotBlank(message="L'email du client est obligatoire")
+     * @Assert\Email(message="Adresse email invalide")
      */
     private $email;
 
@@ -81,6 +84,7 @@ class Customer
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="customers")
      * @Groups({"customers_read"})
+     * @Assert\NotBlank(message="L'utilisateur du client est obligatoire")
      */
     private $user;
 
