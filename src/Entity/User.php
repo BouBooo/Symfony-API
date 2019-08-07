@@ -14,7 +14,13 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 /**
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  * @UniqueEntity("email", message="Cet email est déjà pris")
- * @ApiResource
+ * @ApiResource(
+ *  normalizationContext={
+ *      "groups" = {
+ *          "users_read"   
+ *       }
+ *  }
+ * )
  */
 class User implements UserInterface
 {
@@ -22,13 +28,13 @@ class User implements UserInterface
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
-     * @Groups({"customers_read", "invoices_read", "invoices_subresource"})
+     * @Groups({"customers_read", "invoices_read", "invoices_subresource", "users_read"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=180, unique=true)
-     * @Groups({"customers_read", "invoices_read", "invoices_subresource"})
+     * @Groups({"customers_read", "invoices_read", "invoices_subresource", "users_read"})
      * @Assert\Email(message="Adresse email invalide")
      * @Assert\NotBlank(message="L'email de l'utilisateur est obligatoire")
      */
@@ -48,7 +54,7 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"customers_read", "invoices_read", "invoices_subresource"})
+     * @Groups({"customers_read", "invoices_read", "invoices_subresource", "users_read"})
      * @Assert\Length(min=3, minMessage="Le prénom doit faire minimum 3 charactères", max=255, maxMessage="Le prénom doit faire maximum 255 charactères")
      * @Assert\NotBlank(message="Le prénom de l'utilisateur est obligatoire")
      */
@@ -56,7 +62,7 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"customers_read", "invoices_read", "invoices_subresource"})
+     * @Groups({"customers_read", "invoices_read", "invoices_subresource", "users_read"})
      * @Assert\Length(min=3, minMessage="Le nom doit faire minimum 3 charactères", max=255, maxMessage="Le nom doit faire maximum 255 charactères")
      * @Assert\NotBlank(message="Le nom de l'utilisateur est obligatoire")
      */
