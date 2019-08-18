@@ -1,9 +1,12 @@
-import React, {useState} from 'react'
+import React, {useState, useContext} from 'react'
 import axios from 'axios' 
 import customersAPI from '../services/customersAPI';
 import AuthAPI from '../services/authAPI';
+import AuthContext from '../contexts/AuthContext'
 
-const LoginPage = ({onLogin, history}) => {
+const LoginPage = ({history}) => {
+
+    const { setIsAuthenticated} = useContext(AuthContext)
 
     const [credentials, setCredentials] = useState({
         username : "",
@@ -23,7 +26,7 @@ const LoginPage = ({onLogin, history}) => {
         try {
             await AuthAPI.authenticate(credentials)
             setError("")
-            onLogin(true)
+            setIsAuthenticated(true)
             history.replace("/customers")
         } catch(error) {
             setError("Cet email ne correspond à aucun compte.")

@@ -1,20 +1,20 @@
-import React, {useState} from 'react';
+import React, {useState, useContext} from 'react';
 import ReactDOM from "react-dom";
 import Navbar from './components/Navbar';
 import Homepage from './pages/Homepage';
-import { HashRouter, Switch, Route, withRouter } from 'react-router-dom';
+import { HashRouter, Switch, Route, withRouter, Redirect } from 'react-router-dom';
 import CustomersPage from './pages/CustomersPage';
 import InvoicesPage from './pages/InvoicesPage';
 import CustomersPageWithPagination from './pages/CustomersPageWithPagination';
 import LoginPage from './pages/LoginPage';
 import AuthAPI from './services/authAPI'
+import AuthContext from './contexts/AuthContext'
+import PrivateRoute from './components/PrivateRoute'
 
 require('../css/app.css');
 
 
 AuthAPI.setUp() 
-
-console.log('Webpack Encore allow');
 
 const App = () => {
 
@@ -22,30 +22,39 @@ const App = () => {
 
     const NavbarWithRouter = withRouter(Navbar)
 
-    return <>
-        <HashRouter>
-            <NavbarWithRouter 
-                isAuthenticated={isAuthenticated} 
-                onLogout={setIsAuthenticated}
-            />
 
-            <main className="container pt-5">
-                <Switch>
-                    <Route path="/invoices" component={InvoicesPage}/>
-                    <Route path="/customers" component={CustomersPage}/>
-                    <Route 
-                        path="/login" 
-                        render={props => (
-                            <LoginPage
-                                onLogin={setIsAuthenticated}
-                                {...props}
-                            /> 
-                        )}
-                    />
-                    <Route path="/" component={Homepage}/>
-                </Switch>
-            </main>
-        </HashRouter>
+    return <>
+        <AuthContext.Provider value={{
+            isAuthenticated,
+            setIsAuthenticated
+        }}>
+            <HashRouter>
+                <NavbarWithRouter />
+
+                <main className="container pt-5">
+                    <Switch>
+                        <PrivateRoute 
+                            path="/invoices" 
+                            component={InvoicesPage} 
+                        />
+
+                        <PrivateRoute
+                            path="/customers" 
+                            component={CustomersPage} 
+                        />
+
+                        <Route 
+                            path="/login" 
+                            component={LoginPage}
+                        />
+                        <Route 
+                            path="/" 
+                            component={Homepage}
+                        />
+                    </Switch>
+                </main>
+            </HashRouter>
+        </AuthContext.Provider>
     </>
 }
 
